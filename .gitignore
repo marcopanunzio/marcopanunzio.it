@@ -31,8 +31,3 @@ AGENTS.md
 # editor
 .vscode/
 
-# certificati Let's Encrypt generati sulla VPS (si tiene solo la struttura)
-deploy/certbot/conf/*
-!deploy/certbot/conf/.gitkeep
-deploy/certbot/www/*
-!deploy/certbot/www/.gitkeep

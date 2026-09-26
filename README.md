@@ -47,11 +47,8 @@ npm run preview  # serves dist/
 
 ## Deployment
 
-Everything runs in Docker: the VPS only needs Docker with Compose.
-
-- `sito`: builds the site and serves the static files with nginx
-- `proxy` (`vps` profile): nginx reverse proxy with HTTPS, ports 80 and 443
-- `certbot` (`vps` profile): renews the Let's Encrypt certificates every 12 hours
+The `sito` container builds the site and serves it over plain HTTP with nginx on `127.0.0.1:8080`.
+HTTPS is handled by the reverse proxy already running on the VPS.
 
 ### Local test
 
@@ -60,34 +57,41 @@ docker compose up -d --build   # http://localhost:8080
 docker compose down
 ```
 
-### First install on the VPS
-
-1. DNS: point the A/AAAA records of `marcopanunzio.it` and `www` to the VPS IP (do not touch MX, SPF, DKIM, DMARC).
-2. Clone the repository and build the site:
-
-   ```bash
-   git clone git@github.com:marcopanunzio/marcopanunzio.it.git && cd marcopanunzio.it
-   docker compose build
-   ```
-
-3. First certificate (port 80 must be free):
-
-   ```bash
-   docker compose --profile vps run --rm -p 80:80 --entrypoint certbot certbot \
-     certonly --standalone -d marcopanunzio.it -d www.marcopanunzio.it \
-     -m posta@marcopanunzio.it --agree-tos --no-eff-email
-   ```
-
-4. Start:
-
-   ```bash
-   docker compose --profile vps up -d
-   ```
-
-### Updates
+### VPS
 
 ```bash
-git pull && docker compose --profile vps up -d --build
+git clone git@github.com:marcopanunzio/marcopanunzio.it.git && cd marcopanunzio.it
+docker compose up -d --build
 ```
 
-The proxy configuration is in `deploy/nginx/proxy.conf`, the site container's in `docker/nginx.conf`.
+Updates:
+
+```bash
+git pull && docker compose up -d --build
+```
+
+Reverse proxy example (nginx, TLS certificates managed as for the other containers):
+
+```nginx
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name marcopanunzio.it;
+
+    # ssl_certificate / ssl_certificate_key ...
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+If the proxy runs in a container, put both on the same Docker network and use `proxy_pass http://marcopanunzio-it:80;` instead.
+
+When pointing the domain to the VPS, only change the A/AAAA records: `marcopanunzio.it` is also used for email (MX, SPF, DKIM, DMARC).
+
+The site container's nginx configuration is in `docker/nginx.conf`.
