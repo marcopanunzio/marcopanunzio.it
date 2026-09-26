@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+import Preloader from '../components/react/Preloader';
+import Cursor from '../components/react/Cursor';
+
+interface Props {
+  title: string;
+  description: string;
+  url: string;
+  name: string;
+  preloaderWords?: string[];
+}
+const { title, description, url, name, preloaderWords = [] } = Astro.props;
+const canonical = new URL(Astro.url.pathname, url).href;
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="author" content={name} />
+    <meta name="theme-color" content="#0e0e0c" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <script is:inline>
+      // Prima del paint: abilita le animazioni e salta il preloader se già visto
+      (function () {
+        var d = document.documentElement;
+        var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduced) d.classList.add('motion');
+        try {
+          if (sessionStorage.getItem('mp-intro')) d.dataset.intro = 'seen';
+        } catch (e) {}
+        if (reduced) d.dataset.intro = 'seen';
+        // rete di sicurezza: se lo script delle animazioni non parte, mostra comunque tutto
+        setTimeout(function () {
+          if (!d.classList.contains('motion-ready')) d.classList.remove('motion');
+        }, 4000);
+      })();
+    </script>
+  </head>
+  <body id="top">
+    <a href="#main" class="label fixed left-4 top-4 z-[120] -translate-y-24 bg-accent px-3 py-2 text-black focus:translate-y-0">
+      Vai al contenuto
+    </a>
+    <Preloader client:load words={preloaderWords} name={name} />
+    <Cursor client:only="react" />
+    <div class="grain" aria-hidden="true"></div>
+    <slot />
+    <script>
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>

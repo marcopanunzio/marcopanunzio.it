@@ -1,0 +1,52 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import SectionHead from '../SectionHead.astro';
+
+type Data = Extract<CollectionEntry<'sezioni'>['data'], { layout: 'about' }>;
+interface Props { entry: CollectionEntry<'sezioni'>; data: Data; id: string; index: number }
+const { entry, data, id, index } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<section id={id} class="wrap py-28 md:py-44">
+  <SectionHead index={index} kicker={data.kicker} title={data.title} />
+
+  <div class="grid gap-16 md:grid-cols-12">
+    <div
+      class="display text-[clamp(1.55rem,3vw,2.75rem)] leading-[1.18] tracking-[-0.02em] md:col-span-9 md:col-start-4 [&_p+p]:mt-6"
+      data-scrub-words
+    >
+      <Content />
+    </div>
+  </div>
+
+  {
+    data.stats.length > 0 && (
+      <dl class="mt-24 grid gap-px overflow-hidden border-y border-line bg-line md:mt-36 md:grid-cols-3" data-reveal="stagger">
+        {data.stats.map((s) => (
+          <div class="flex flex-col bg-bg py-8 md:px-8 md:py-12 md:first:pl-0">
+            <dt class="label order-2 mt-3 block max-w-[24ch] text-muted">{s.label}</dt>
+            <dd class="display order-1 text-[clamp(4rem,9vw,8rem)] leading-none tabular-nums" data-count>
+              {s.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+
+  {
+    data.interests.length > 0 && (
+      <div class="mt-20 grid gap-6 md:grid-cols-12">
+        <p class="label text-muted md:col-span-3">{data.interestsTitle}</p>
+        <ul class="flex flex-wrap gap-2 md:col-span-9" data-reveal="stagger">
+          {data.interests.map((it) => (
+            <li class="rounded-full border border-line px-4 py-2 text-sm transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-black md:text-base">
+              {it}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+</section>

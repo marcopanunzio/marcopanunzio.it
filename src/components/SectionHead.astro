@@ -1,0 +1,28 @@
+---
+import { inline } from '../lib/text';
+
+interface Props {
+  index: number;
+  kicker?: string;
+  title?: string;
+  class?: string;
+}
+const { index, kicker, title, class: className = '' } = Astro.props;
+---
+
+<div class:list={['mb-14 md:mb-24', className]}>
+  {
+    kicker && (
+      <p class="label mb-6 flex items-center gap-3 text-muted" data-reveal>
+        <span class="text-accent">({String(index).padStart(2, '0')})</span>
+        <span class="h-px w-10 bg-line" />
+        {kicker}
+      </p>
+    )
+  }
+  {
+    title && (
+      <h2 class="display max-w-[14ch] text-[clamp(2.8rem,8vw,8.5rem)]" data-split="lines" set:html={inline(title)} />
+    )
+  }
+</div>

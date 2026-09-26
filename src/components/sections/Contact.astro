@@ -1,0 +1,70 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Clock from '../react/Clock';
+import { inline, pad } from '../../lib/text';
+
+type Data = Extract<CollectionEntry<'sezioni'>['data'], { layout: 'contact' }>;
+interface Props {
+  entry: CollectionEntry<'sezioni'>;
+  data: Data;
+  id: string;
+  index: number;
+  site: { name: string; timezone: string; location: string; footerNote?: string };
+}
+const { entry, data, id, index, site } = Astro.props;
+const { Content } = await render(entry);
+const year = new Date().getFullYear();
+---
+
+<section id={id} class="relative flex min-h-svh flex-col justify-between overflow-hidden pt-28 md:pt-44">
+  <div class="wrap">
+    <p class="label mb-6 flex items-center gap-3 text-muted" data-reveal>
+      <span class="text-accent">({pad(index)})</span><span class="h-px w-10 bg-line"></span>{data.kicker}
+    </p>
+    {data.title && <h2 class="display max-w-[12ch] text-[clamp(3rem,9vw,9.5rem)]" data-split="lines" set:html={inline(data.title)} />}
+
+    <div class="mt-14 grid gap-10 md:mt-20 md:grid-cols-12 md:items-end">
+      <div class="prose-site max-w-[38ch] md:col-span-5" data-reveal><Content /></div>
+      <div class="md:col-span-7 md:justify-self-end" data-reveal>
+        <a
+          href={`mailto:${data.email}`}
+          data-magnetic="0.15"
+          data-cursor="scrivi"
+          class="group display inline-flex items-center gap-4 text-[clamp(1.7rem,4.6vw,4.6rem)] leading-none"
+        >
+          <span class="link-line pb-1">{data.email}</span>
+          <span class="inline-grid h-[1.1em] w-[1.1em] place-items-center rounded-full bg-accent text-[0.5em] text-black transition-transform duration-500 group-hover:rotate-[-45deg]">→</span>
+        </a>
+        {
+          data.links.length > 0 && (
+            <ul class="label mt-8 flex flex-wrap gap-6 md:justify-end">
+              {data.links.map((l) => (
+                <li>
+                  <a href={l.href} class="link-line pb-0.5" target="_blank" rel="noopener noreferrer me">
+                    {l.label} ↗
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-24">
+    <div class="wrap label flex flex-wrap items-center justify-between gap-4 border-t border-line py-5 text-muted">
+      <span>© {year} {site.name}</span>
+      {site.footerNote && <span class="hidden md:inline">{site.footerNote}</span>}
+      <Clock client:visible timezone={site.timezone} city={site.location} />
+      <a href="#top" class="link-line pb-0.5 text-fg" data-cursor="su">Torna su ↑</a>
+    </div>
+    <p
+      class="display select-none whitespace-nowrap px-[1vw] pb-[1vw] text-center text-[14.2vw] leading-[0.8] tracking-[-0.05em]"
+      aria-hidden="true"
+      data-reveal
+    >
+      {site.name.split(' ').map((w, i) => (i === 1 ? <em class="text-accent">{w}</em> : <>{w} </>))}
+    </p>
+  </footer>
+</section>

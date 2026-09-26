@@ -1,0 +1,45 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import GanttField from '../react/GanttField';
+import { inline } from '../../lib/text';
+
+type Data = Extract<CollectionEntry<'sezioni'>['data'], { layout: 'hero' }>;
+interface Props { data: Data; id: string }
+const { data, id } = Astro.props;
+// rientri editoriali delle righe del titolo
+const indents = ['', 'md:pl-[14vw]', 'md:pl-[6vw]', 'md:pl-[20vw]'];
+---
+
+<section id={id} class="wrap relative flex min-h-svh flex-col justify-end overflow-hidden pb-8 pt-36 md:pb-10">
+  <GanttField client:load />
+
+  <h1 class="display relative text-[clamp(3.4rem,min(15.5vw,20svh),16rem)] leading-[0.86]">
+    {
+      data.headline.map((line, i) => (
+        <span class:list={['block', indents[i % indents.length]]} data-split="hero" data-delay={i * 0.12} set:html={inline(line)} />
+      ))
+    }
+  </h1>
+
+  <div class="relative mt-10 grid gap-8 border-t border-line pt-6 md:mt-14 md:grid-cols-12 md:items-end">
+    <p class="text-lg leading-snug md:col-span-5 md:text-xl" data-reveal data-reveal-intro>{data.intro}</p>
+    <ul class="label space-y-1.5 text-muted md:col-span-4 md:col-start-7" data-reveal="stagger" data-reveal-intro>
+      {data.meta.map((m) => <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rotate-45 bg-accent" />{m}</li>)}
+    </ul>
+    {
+      data.cta && (
+        <div class="md:col-span-2 md:col-start-11 md:justify-self-end" data-reveal data-reveal-intro>
+          <a
+            href={data.cta.href}
+            data-magnetic="0.4"
+            data-cursor="vai"
+            class="group relative grid h-28 w-28 place-items-center overflow-hidden rounded-full border border-fg text-center md:h-32 md:w-32"
+          >
+            <span class="absolute inset-0 translate-y-full rounded-full bg-accent transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-y-0" />
+            <span class="label relative transition-colors group-hover:text-black">{data.cta.label} ↘</span>
+          </a>
+        </div>
+      )
+    }
+  </div>
+</section>

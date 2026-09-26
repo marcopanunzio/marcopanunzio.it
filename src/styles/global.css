@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+/* Font self-hosted (niente Google Fonts, niente richieste a terzi) */
+@import "@fontsource-variable/fraunces/full.css";
+@import "@fontsource-variable/fraunces/full-italic.css";
+@import "@fontsource-variable/inter-tight/wght.css";
+@import "@fontsource/jetbrains-mono/400.css";
+
+/* Colori registrati come proprietà tipizzate: così il cambio tema si anima */
+@property --bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0e0e0c;
+}
+@property --fg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ece7dd;
+}
+
+:root {
+  --bg: #0e0e0c;
+  --fg: #ece7dd;
+  --accent: #ff4f1f;
+  --muted: color-mix(in oklab, var(--fg) 56%, var(--bg));
+  --line: color-mix(in oklab, var(--fg) 16%, var(--bg));
+  --gutter: clamp(1rem, 4vw, 3.5rem);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+  transition:
+    --bg 0.8s var(--ease-out),
+    --fg 0.8s var(--ease-out);
+}
+
+:root.theme-light {
+  --bg: #ece7dd;
+  --fg: #11110e;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --font-display: "Fraunces Variable", "Times New Roman", serif;
+  --font-sans: "Inter Tight Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--accent);
+    color: #0e0e0c;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+  /* Con il cursore custom attivo nascondiamo quello di sistema */
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+@layer components {
+  .wrap {
+    padding-inline: var(--gutter);
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .display {
+    font-family: var(--font-display);
+    font-variation-settings:
+      "SOFT" 50,
+      "WONK" 0,
+      "opsz" 144;
+    font-weight: 380;
+    letter-spacing: -0.035em;
+    line-height: 0.92;
+  }
+  .display em,
+  .accent-em em {
+    font-style: italic;
+    color: var(--accent);
+    font-variation-settings:
+      "SOFT" 100,
+      "WONK" 1,
+      "opsz" 144;
+    font-weight: 320;
+  }
+  .prose-site {
+    font-size: clamp(1.05rem, 1.3vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--muted);
+  }
+  .prose-site strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+  .prose-site p + p,
+  .prose-site p + ul {
+    margin-top: 1em;
+  }
+  .prose-site ul {
+    display: grid;
+    gap: 0.1rem;
+  }
+  .prose-site li {
+    position: relative;
+    padding: 0.8rem 0 0.8rem 1.75rem;
+    border-top: 1px solid var(--line);
+  }
+  .prose-site li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.42rem;
+    width: 0.65rem;
+    height: 0.65rem;
+    background: var(--accent);
+    transform: rotate(45deg) scale(0.7);
+  }
+
+  /* Link con sottolineatura che si disegna */
+  .link-line {
+    background: linear-gradient(currentColor, currentColor) no-repeat 100% 100% / 0 1px;
+    transition: background-size 0.6s var(--ease-out);
+  }
+  .link-line:hover,
+  .link-line:focus-visible {
+    background-position: 0 100%;
+    background-size: 100% 1px;
+  }
+}
+
+/* Grana analogica sopra tutto */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Prima che le animazioni partano, gli elementi animati restano nascosti
+   (solo se JS e motion sono attivi: senza JS il sito è interamente leggibile) */
+html.motion [data-split],
+html.motion [data-reveal] {
+  visibility: hidden;
+}
+
+/* Preloader già visto in questa sessione */
+html[data-intro="seen"] .preloader {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    animation: none;
+  }
+  :root {
+    transition: none;
+  }
+}
+
+/* Le maschere delle righe non devono tagliare discendenti e corsivi */
+.split-line-mask {
+  padding: 0 0.08em 0.14em;
+  margin: 0 -0.08em -0.14em;
+}
+
+/* Menu mobile aperto: l'header torna nero pieno sopra il pannello arancione */
+html.menu-open [data-nav] {
+  mix-blend-mode: normal;
+  color: #000;
+}
+html.menu-open [data-nav] .text-white\/60 {
+  color: rgb(0 0 0 / 0.6);
+}

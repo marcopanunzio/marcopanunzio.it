@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const [siteEntry] = await getCollection('sito');
+const site = siteEntry.data;
+---
+
+<Base title={`Pagina non trovata — ${site.name}`} description={site.seoDescription} url={site.url} name={site.name}>
+  <main id="main" class="wrap flex min-h-svh flex-col justify-between py-8">
+    <a href="/" class="display text-2xl">{site.name}</a>
+    <div>
+      <p class="label mb-6 text-accent">Errore 404 · fuori pianificazione</p>
+      <h1 class="display text-[clamp(4rem,16vw,15rem)]">Questa <em>milestone</em><br />non esiste.</h1>
+    </div>
+    <a href="/" class="label link-line self-start pb-0.5">← Torna alla home</a>
+  </main>
+</Base>

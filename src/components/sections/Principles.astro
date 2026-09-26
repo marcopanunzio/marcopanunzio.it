@@ -1,0 +1,48 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import SectionHead from '../SectionHead.astro';
+import { pad } from '../../lib/text';
+
+type Data = Extract<CollectionEntry<'sezioni'>['data'], { layout: 'principles' }>;
+interface Props { entry: CollectionEntry<'sezioni'>; data: Data; id: string; index: number }
+const { entry, data, id, index } = Astro.props;
+const { Content } = await render(entry);
+const total = data.quotes.length;
+---
+
+<section id={id} class="wrap py-28 md:py-44" data-theme={data.theme}>
+  <SectionHead index={index} kicker={data.kicker} title={data.title} />
+
+  <div class="grid gap-10 md:grid-cols-12">
+    <div class="prose-site text-fg md:col-span-6 md:col-start-7 md:text-[1.35rem]" data-reveal>
+      <Content />
+    </div>
+  </div>
+
+  <div class="mt-20 md:mt-32" data-stack>
+    {
+      data.quotes.map((q, i) => {
+        const last = i === total - 1;
+        return (
+          <figure
+            data-stack-card
+            class:list={[
+              'sticky mb-6 flex min-h-[58svh] origin-top flex-col justify-between rounded-[1.75rem] border p-7 shadow-[0_-20px_60px_-30px_rgb(0_0_0/0.35)] md:mb-10 md:p-14',
+              last ? 'border-accent bg-accent text-black' : 'border-line bg-[color-mix(in_oklab,var(--fg)_5%,var(--bg))]',
+            ]}
+            style={`top: calc(12svh + ${i * 1.4}rem)`}
+          >
+            <div class="label flex justify-between opacity-70">
+              <span>{pad(i + 1)} / {pad(total)}</span>
+              <span>{q.note ?? 'Come lavoro'}</span>
+            </div>
+            <blockquote class="display mt-12 max-w-[22ch] text-[clamp(1.9rem,4.6vw,4.6rem)] leading-[1.02]">
+              <span class="text-accent" class:list={[last && 'text-black/40']}>“</span>
+              {q.text}
+            </blockquote>
+          </figure>
+        );
+      })
+    }
+  </div>
+</section>

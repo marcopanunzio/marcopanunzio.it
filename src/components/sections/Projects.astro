@@ -1,0 +1,85 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { inline, pad } from '../../lib/text';
+
+type Data = Extract<CollectionEntry<'sezioni'>['data'], { layout: 'projects' }>;
+interface Props {
+  entry: CollectionEntry<'sezioni'>;
+  data: Data;
+  id: string;
+  index: number;
+  projects: CollectionEntry<'progetti'>[];
+}
+const { entry, data, id, index, projects } = Astro.props;
+const { Content } = await render(entry);
+const rendered = await Promise.all(projects.map(async (p) => ({ p, Body: (await render(p)).Content })));
+---
+
+<section id={id} class="relative py-28 min-[900px]:h-svh min-[900px]:overflow-hidden min-[900px]:py-0" data-horizontal>
+  <div
+    class="wrap flex flex-col gap-6 min-[900px]:h-full min-[900px]:w-max min-[900px]:flex-row min-[900px]:items-center min-[900px]:gap-8 min-[900px]:pr-[12vw]"
+    data-horizontal-track
+  >
+    <!-- pannello introduttivo -->
+    <div class="mb-10 flex shrink-0 flex-col justify-center min-[900px]:mb-0 min-[900px]:w-[44vw] min-[900px]:pr-[4vw]">
+      <p class="label mb-6 flex items-center gap-3 text-muted" data-reveal>
+        <span class="text-accent">({pad(index)})</span><span class="h-px w-10 bg-line"></span>{data.kicker}
+      </p>
+      {data.title && <h2 class="display text-[clamp(2.8rem,7.5vw,8rem)]" data-split="lines" set:html={inline(data.title)} />}
+      <div class="prose-site mt-8 max-w-[40ch]" data-reveal><Content /></div>
+      <p class="label mt-10 hidden items-center gap-3 text-muted min-[900px]:flex">Scorri <span class="text-accent">→</span></p>
+    </div>
+
+    {
+      rendered.map(({ p, Body }, i) => (
+        <article
+          data-horizontal-card
+          class="group relative flex shrink-0 flex-col justify-between overflow-hidden rounded-[1.5rem] border border-line p-7 min-h-[26rem] min-[900px]:h-[68svh] min-[900px]:w-[min(30rem,34vw)] md:p-9"
+        >
+          <span class="absolute inset-0 origin-bottom scale-y-0 bg-accent transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-y-100" aria-hidden="true" />
+          <div class="relative flex items-start justify-between transition-colors duration-500 group-hover:text-black">
+            <span class="display text-[clamp(4rem,7vw,7rem)] leading-none text-transparent [-webkit-text-stroke:1px_currentColor] group-hover:text-black">
+              {pad(i + 1)}
+            </span>
+            <div class="label text-right">
+              <p class="text-accent group-hover:text-black">{p.data.area}</p>
+              <p class="mt-1 text-muted group-hover:text-black/70">{p.data.period}</p>
+            </div>
+          </div>
+          <div class="relative transition-colors duration-500 group-hover:text-black">
+            <h3 class="display text-[clamp(1.9rem,2.6vw,2.7rem)] leading-[1]">{p.data.title}</h3>
+            <div class="mt-4 text-[0.98rem] leading-relaxed text-muted group-hover:text-black/75"><Body /></div>
+            {p.data.tags.length > 0 && (
+              <ul class="mt-6 flex flex-wrap gap-1.5">
+                {p.data.tags.map((t) => (
+                  <li class="label rounded-full border border-line px-2.5 py-1 group-hover:border-black/30">{t}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </article>
+      ))
+    }
+
+    {
+      data.stack.length > 0 && (
+        <div class="mt-16 shrink-0 min-[900px]:mt-0 min-[900px]:w-[30vw] min-[900px]:pl-[3vw]">
+          <p class="label mb-6 text-muted">{data.stackTitle}</p>
+          <ul class="display flex flex-wrap gap-x-3 gap-y-1 text-[clamp(1.5rem,2.3vw,2.4rem)] leading-tight">
+            {data.stack.map((s, i) => (
+              <li>
+                {s}
+                {i < data.stack.length - 1 && <span class="text-accent">,</span>}
+              </li>
+            ))}
+          </ul>
+          <p class="mt-6 text-sm text-muted">Come PM con background tecnico, non come sviluppatore attivo.</p>
+        </div>
+      )
+    }
+  </div>
+
+  <div class="wrap absolute inset-x-0 bottom-8 hidden min-[900px]:block" aria-hidden="true">
+    <div class="h-px bg-line"><div class="h-px origin-left scale-x-0 bg-accent" data-horizontal-bar></div></div>
+  </div>
+</section>
