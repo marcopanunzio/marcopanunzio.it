@@ -4,8 +4,7 @@ order: 10
 navLabel: Contatti
 kicker: Contatti
 title: Parliamo di un *progetto*.
-# TODO: conferma l'indirizzo pubblico
-email: ciao@marcopanunzio.it
+email: posta@marcopanunzio.it
 links: []
 # Esempio:
 # links:
